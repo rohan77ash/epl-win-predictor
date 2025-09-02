@@ -18,9 +18,18 @@ create or replace table epl_raw (
     af int      -- away fouls
 );
 
+--custom file format
+create file format football_csv_format
+type = 'csv'
+field_optionally_enclosed_by = '"'
+skip_header = 1
+null_if = ('','null');
+
+--ingest into base table
 copy into epl_raw
 from @int_stg_sample_data/epl_data/
-file_format = (TYPE = CSV FIELD_OPTIONALLY_ENCLOSED_BY='"' SKIP_HEADER=1);
+file_format = (format_name = ''football_csv_format'')
+purge = 'TRUE';
 
 -- final table
 create or replace table match_features as
@@ -45,4 +54,3 @@ from epl_raw;
 
 -- stage for keeping trained model
 create stage model_stage;
-
