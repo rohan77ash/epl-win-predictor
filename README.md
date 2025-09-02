@@ -6,10 +6,12 @@ It extracts features with SQL in Snowflake, trains a model allowing users to que
 ---
 
 ## Workflow
-1. **Sample data ingestion** (`sample_data_ingestion.sql`)  
-   Builds the base table (`epl_raw`) from raw match data and final table (`epl_features`) in Snowflake. 
+1. **Sample data ingestion** (`sample_data_ingestion.sql`)
+   - I downloaded historical data from [recent data for EPL](https://www.football-data.co.uk/englandm.php)
+   - Creates the base table (`epl_raw`) from raw match data and final table (`epl_features`) in Snowflake.
+   - Custom file format is needed based on the data. 
 
-2. **Model Training** (`data-processing-and-training.py`)
+3. **Model Training** (`data-processing-and-training.py`)
    - Connects to snowflake using snowpark  
    - Extracts data from Snowflake  
    - Scales features  
