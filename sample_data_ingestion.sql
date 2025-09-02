@@ -1,5 +1,7 @@
+--stage for sample data 
 create stage int_stg_sample_data;
 
+-- raw data table
 create or replace table epl_raw (
     season string,
     date date,
@@ -20,6 +22,7 @@ copy into epl_raw
 from @int_stg_sample_data/epl_data/
 file_format = (TYPE = CSV FIELD_OPTIONALLY_ENCLOSED_BY='"' SKIP_HEADER=1);
 
+-- final table
 create or replace table match_features as
 select
     season,
@@ -35,8 +38,11 @@ select
     ac,
     hf,
     af,
-    -- Engineered features
     (hst - ast) as shots_diff,
     (hc - ac) as corners_diff,
     (hf - af) as fouls_diff
 from epl_raw;
+
+-- stage for keeping trained model
+create stage model_stage;
+
