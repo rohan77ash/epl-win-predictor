@@ -1,19 +1,22 @@
-CREATE OR REPLACE TABLE EPL_RAW (
-    Season STRING,
-    Date DATE,
-    HomeTeam STRING,
-    AwayTeam STRING,
-    FTHG INT,   -- Full Time Home Goals
-    FTAG INT,   -- Full Time Away Goals
-    FTR STRING, -- Full Time Result (H/D/A)
-    HST INT,    -- Home Shots on Target
-    AST INT,    -- Away Shots on Target
-    HC INT,     -- Home Corners
-    AC INT,     -- Away Corners
-    HF INT,     -- Home Fouls
-    AF INT      -- Away Fouls
+create or replace table epl_raw (
+    season string,
+    date date,
+    hometeam string,
+    awayteam string,
+    fthg int,   -- full time home goals
+    ftag int,   -- full time away goals
+    ftr string, -- full time result (h/d/a)
+    hst int,    -- home shots on target
+    ast int,    -- away shots on target
+    hc int,     -- home corners
+    ac int,     -- away corners
+    hf int,     -- home fouls
+    af int      -- away fouls
 );
 
-COPY INTO EPL_RAW
-FROM @my_stage/epl_data/
-FILE_FORMAT = (TYPE = CSV FIELD_OPTIONALLY_ENCLOSED_BY='"' SKIP_HEADER=1);
+
+create stage int_stg_sample_data;
+
+copy into epl_raw
+from @int_stg_sample_data/epl_data/
+file_format = (TYPE = CSV FIELD_OPTIONALLY_ENCLOSED_BY='"' SKIP_HEADER=1);
