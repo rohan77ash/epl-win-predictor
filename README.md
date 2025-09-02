@@ -20,9 +20,4 @@ It extracts features with SQL in Snowflake, trains a model allowing users to que
    - Calls the trained model  
    - Returns win/draw/loss probability
 
----
 
-## 📂 How to Run
-### 1️⃣ Setup Environment
-```bash
-pip install -r requirements.txt
