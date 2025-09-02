@@ -1,59 +1,72 @@
-CREATE OR REPLACE PROCEDURE predict_match_result(match_num INT)
-RETURNS TABLE (
-    match_number INT,
-    home_team STRING,
-    away_team STRING,
-    home_win_prob FLOAT,
-    draw_prob FLOAT,
-    away_win_prob FLOAT
+create or replace function predict_match(
+    home_team string,
+    away_team string,
+    home_wins int,
+    home_draws int,
+    home_losses int,
+    away_wins int,
+    away_draws int,
+    away_losses int,
+    home_goals_scored int,
+    home_goals_conceded int,
+    away_goals_scored int,
+    away_goals_conceded int
 )
-LANGUAGE PYTHON
-RUNTIME_VERSION = '3.10'
-PACKAGES = ('snowflake-snowpark-python','pandas','scikit-learn','joblib')
-HANDLER = 'run'
-IMPORTS = ('@model_stage/epl_model.pkl')
-AS
+returns object
+language python
+runtime_version = '3.10'
+packages = ('scikit-learn','pandas')
+imports = ('@model_stage/epl_model.pkl')
+handler = 'predict'
+as
 $$
-import joblib
+import pickle
 import pandas as pd
 
-def run(session, match_num: int):
-    # Load trained model
-    model = joblib.load("epl_model.pkl")
+# load trained model
+with open("epl_model.pkl", "rb") as f:
+    model = pickle.load(f)
 
-    # Get features for the requested match
-    fixtures_df = session.table("upcoming_fixtures_features") \
-                         .filter(f"match_number = {match_num}") \
-                         .to_pandas()
+def predict(home_team, away_team,
+            home_wins, home_draws, home_losses,
+            away_wins, away_draws, away_losses,
+            home_goals_scored, home_goals_conceded,
+            away_goals_scored, away_goals_conceded):
 
-    if fixtures_df.empty:
-        return pd.DataFrame([], columns=["match_number","home_team","away_team","home_win_prob","draw_prob","away_win_prob"])
-
-    # Predict probabilities
-    probs = model.predict_proba(fixtures_df.drop(columns=["match_number","home_team","away_team"]))[0]
-    classes = model.classes_
-
-    # Initialize
-    home_p, draw_p, away_p = 0, 0, 0
-
-    # Assign based on class labels
-    for cls, prob in zip(classes, probs):
-        if cls == "H":
-            home_p = round(float(prob) * 100, 2)
-        elif cls == "D":
-            draw_p = round(float(prob) * 100, 2)
-        elif cls == "A":
-            away_p = round(float(prob) * 100, 2)
-
-    # Build clean result row
-    result = pd.DataFrame([{
-        "match_number": int(fixtures_df.iloc[0]["match_number"]),
-        "home_team": fixtures_df.iloc[0]["home_team"],
-        "away_team": fixtures_df.iloc[0]["away_team"],
-        "home_win_prob": home_p,
-        "draw_prob": draw_p,
-        "away_win_prob": away_p
+    # construct input features from arguments
+    features = pd.DataFrame([{
+        "home_wins": home_wins,
+        "home_draws": home_draws,
+        "home_losses": home_losses,
+        "away_wins": away_wins,
+        "away_draws": away_draws,
+        "away_losses": away_losses,
+        "home_goals_scored": home_goals_scored,
+        "home_goals_conceded": home_goals_conceded,
+        "away_goals_scored": away_goals_scored,
+        "away_goals_conceded": away_goals_conceded
     }])
 
-    return result
+    # get probabilities
+    probs = model.predict_proba(features)[0]
+
+    return {
+        "home_team": home_team,
+        "away_team": away_team,
+        "home_win_prob": float(probs[0]),
+        "draw_prob": float(probs[1]),
+        "away_win_prob": float(probs[2])
+    }
 $$;
+
+
+
+
+call select predict_match(
+    'Home team', 'Away Team',
+    home wins, draws, losses,
+    away wins, draws, losses,
+    home goals scored, conceded,
+    away goals scored, conceded
+);
+
