@@ -1,3 +1,5 @@
+create stage int_stg_sample_data;
+
 create or replace table epl_raw (
     season string,
     date date,
@@ -14,9 +16,27 @@ create or replace table epl_raw (
     af int      -- away fouls
 );
 
-
-create stage int_stg_sample_data;
-
 copy into epl_raw
 from @int_stg_sample_data/epl_data/
 file_format = (TYPE = CSV FIELD_OPTIONALLY_ENCLOSED_BY='"' SKIP_HEADER=1);
+
+create or replace table match_features as
+select
+    season,
+    date,
+    hometeam,
+    awayteam,
+    fthg,
+    ftag,
+    ftr,
+    hst,
+    ast,
+    hc,
+    ac,
+    hf,
+    af,
+    -- Engineered features
+    (hst - ast) as shots_diff,
+    (hc - ac) as corners_diff,
+    (hf - af) as fouls_diff
+from epl_raw;
