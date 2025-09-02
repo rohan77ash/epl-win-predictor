@@ -6,7 +6,7 @@ It extracts features with SQL in Snowflake, trains a model allowing users to que
 ---
 
 ## Workflow
-1. **Sample data ingestion** (`sql/create_features.sql`)  
+1. **Sample data ingestion** (`sample_data_ingestion.sql`)  
    Builds the base table (`epl_raw`) from raw match data and final table (`epl_features`) in Snowflake. 
 
 2. **Model Training** (`scripts/train_model.py`)  
@@ -15,7 +15,7 @@ It extracts features with SQL in Snowflake, trains a model allowing users to que
    - Uses GridSearchCV for tuning  
    - Trains a Gradient Boosting model  
 
-3. **Prediction** (`app/predict.py`)  
+3. **Prediction** (`output-procedure.sql`)  
    - Connects to Snowflake and fetches team matchup features  
    - Calls the trained model  
    - Returns win/draw/loss probability
