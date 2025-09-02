@@ -7,7 +7,8 @@ It extracts features with SQL in Snowflake, trains a model allowing users to que
 
 ## Workflow
 1. **Sample data ingestion** (`sample_data_ingestion.sql`)
-   - I downloaded historical data from [recent data for EPL](https://www.football-data.co.uk/englandm.php)
+   - Downloaded historical data from  [recent data for EPL](https://www.football-data.co.uk/englandm.php) > premier league, for each year
+   - Upload to stage for ingestion, custom file format used depending on the data source
    - Creates the base table (`epl_raw`) from raw match data and final table (`epl_features`) in Snowflake.
    - Custom file format is needed based on the data. 
 
